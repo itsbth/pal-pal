@@ -33,10 +33,28 @@ type Metrics struct {
 	RecordedAt       time.Time
 }
 
+type WorldActor struct {
+	Type     string `json:"Type"`
+	UnitType string `json:"UnitType"`
+}
+
+type GameData struct {
+	SnapshotTime string       `json:"Time"`
+	FPS          float64      `json:"FPS"`
+	AverageFPS   float64      `json:"AverageFPS"`
+	InGameTime   string       `json:"InGameTime"`
+	InGameDays   int          `json:"InGameDays"`
+	Actors       []WorldActor `json:"ActorData"`
+	RecordedAt   time.Time
+}
+
 type Snapshot struct {
-	Info      ServerInfo
-	Players   []Player
-	Metrics   Metrics
-	UpdatedAt time.Time
-	LastError string
+	Info            ServerInfo
+	Players         []Player
+	Metrics         Metrics
+	GameDataEnabled bool
+	GameData        GameData
+	GameDataError   string
+	UpdatedAt       time.Time
+	LastError       string
 }

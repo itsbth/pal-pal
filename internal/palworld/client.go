@@ -67,6 +67,12 @@ func (c *Client) Metrics(ctx context.Context) (domain.Metrics, error) {
 	return metrics, err
 }
 
+func (c *Client) GameData(ctx context.Context) (domain.GameData, error) {
+	var gameData domain.GameData
+	err := c.do(ctx, http.MethodGet, "/game-data", nil, &gameData)
+	return gameData, err
+}
+
 func (c *Client) Settings(ctx context.Context) (map[string]any, error) {
 	settings := make(map[string]any)
 	err := c.do(ctx, http.MethodGet, "/settings", nil, &settings)

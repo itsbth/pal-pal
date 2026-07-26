@@ -170,6 +170,7 @@ func (s *Server) settingsPage(w http.ResponseWriter, r *http.Request, current se
 func (s *Server) overviewComponent(w http.ResponseWriter, r *http.Request, current session) {
 	data := s.baseData("", "", current)
 	data.Snapshot = s.monitor.Snapshot()
+	data.WorldSummary = summarizeWorld(data.Snapshot.GameData.Actors)
 	s.renderComponent(w, "overview", data)
 }
 

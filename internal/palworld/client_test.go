@@ -57,3 +57,38 @@ func TestNewClientAddsDefaultAPIPath(t *testing.T) {
 		t.Fatalf("ServerName = %q", info.ServerName)
 	}
 }
+
+func TestGameData(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/v1/api/game-data" {
+			t.Errorf("path = %q", r.URL.Path)
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"Time":       "2026-07-26 20:16:45",
+			"FPS":        59.6,
+			"AverageFPS": 58.9,
+			"InGameTime": "14:30",
+			"InGameDays": 5,
+			"ActorData": []map[string]any{
+				{"Type": "Character", "UnitType": "BaseCampPal", "ip": "192.0.2.1"},
+				{"Type": "PalBox"},
+			},
+		})
+	}))
+	defer server.Close()
+
+	client, err := NewClient(server.URL, "secret")
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	gameData, err := client.GameData(context.Background())
+	if err != nil {
+		t.Fatalf("GameData() error = %v", err)
+	}
+	if gameData.InGameTime != "14:30" || gameData.InGameDays != 5 {
+		t.Fatalf("GameData() time = %q, day = %d", gameData.InGameTime, gameData.InGameDays)
+	}
+	if len(gameData.Actors) != 2 || gameData.Actors[0].UnitType != "BaseCampPal" {
+		t.Fatalf("GameData() actors = %#v", gameData.Actors)
+	}
+}

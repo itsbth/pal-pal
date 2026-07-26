@@ -23,3 +23,18 @@ func TestPlayersForViewRedactsIPForViewer(t *testing.T) {
 		t.Fatalf("admin IP = %q", adminRows[0].IP)
 	}
 }
+
+func TestSummarizeWorld(t *testing.T) {
+	actors := []domain.WorldActor{
+		{Type: "Character", UnitType: "Player"},
+		{Type: "Character", UnitType: "BaseCampPal"},
+		{Type: "Character", UnitType: "BaseCampPal"},
+		{Type: "Character", UnitType: "WildPal"},
+		{Type: "PalBox"},
+	}
+
+	summary := summarizeWorld(actors)
+	if summary.Actors != 5 || summary.BasePals != 2 || summary.WildPals != 1 || summary.PalBoxes != 1 {
+		t.Fatalf("summarizeWorld() = %#v", summary)
+	}
+}

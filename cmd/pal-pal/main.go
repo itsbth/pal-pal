@@ -67,7 +67,12 @@ func run(parent context.Context) error {
 	}
 	defer database.Close()
 
-	serverMonitor := monitor.New(api, database, cfg.PollInterval, cfg.HistoryLimit, log)
+	serverMonitor := monitor.New(api, database, monitor.Config{
+		PollInterval:     cfg.PollInterval,
+		HistoryRetention: cfg.HistoryLimit,
+		GameDataEnabled:  cfg.GameDataEnabled,
+		GameDataInterval: cfg.GameDataInterval,
+	}, log)
 	webServer, err := palweb.New(api, serverMonitor, database, palweb.Config{
 		PublicRead:     cfg.PublicRead,
 		PublicPassword: cfg.PublicPassword,
@@ -95,7 +100,12 @@ func run(parent context.Context) error {
 
 	serverErrors := make(chan error, 1)
 	go func() {
-		log.Info("pal-pal listening", "address", cfg.ListenAddress, "public_read", cfg.PublicRead)
+		log.Info(
+			"pal-pal listening",
+			"address", cfg.ListenAddress,
+			"public_read", cfg.PublicRead,
+			"game_data", cfg.GameDataEnabled,
+		)
 		serverErrors <- httpServer.ListenAndServe()
 	}()
 

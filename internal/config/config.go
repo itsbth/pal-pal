@@ -11,16 +11,18 @@ import (
 )
 
 type Config struct {
-	APIRoot        string
-	APIPassword    string
-	PublicRead     bool
-	PublicPassword string
-	AdminPassword  string
-	DataPath       string
-	ListenAddress  string
-	SecureCookies  bool
-	PollInterval   time.Duration
-	HistoryLimit   time.Duration
+	APIRoot          string
+	APIPassword      string
+	PublicRead       bool
+	PublicPassword   string
+	AdminPassword    string
+	DataPath         string
+	ListenAddress    string
+	SecureCookies    bool
+	PollInterval     time.Duration
+	HistoryLimit     time.Duration
+	GameDataEnabled  bool
+	GameDataInterval time.Duration
 }
 
 func Load() (Config, error) {
@@ -44,17 +46,29 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	gameDataEnabled, err := envBool("GAME_DATA_ENABLED", false)
+	if err != nil {
+		return Config{}, err
+	}
+
+	gameDataInterval, err := envDuration("GAME_DATA_POLL_INTERVAL", time.Minute)
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
-		APIRoot:        strings.TrimRight(strings.TrimSpace(os.Getenv("API_ROOT")), "/"),
-		APIPassword:    os.Getenv("API_PASSWORD"),
-		PublicRead:     publicRead,
-		PublicPassword: os.Getenv("PUBLIC_PASSWORD"),
-		AdminPassword:  os.Getenv("ADMIN_PASSWORD"),
-		DataPath:       envOr("DATA_PATH", "data"),
-		ListenAddress:  envOr("LISTEN_ADDRESS", ":8080"),
-		SecureCookies:  secureCookies,
-		PollInterval:   pollInterval,
-		HistoryLimit:   historyLimit,
+		APIRoot:          strings.TrimRight(strings.TrimSpace(os.Getenv("API_ROOT")), "/"),
+		APIPassword:      os.Getenv("API_PASSWORD"),
+		PublicRead:       publicRead,
+		PublicPassword:   os.Getenv("PUBLIC_PASSWORD"),
+		AdminPassword:    os.Getenv("ADMIN_PASSWORD"),
+		DataPath:         envOr("DATA_PATH", "data"),
+		ListenAddress:    envOr("LISTEN_ADDRESS", ":8080"),
+		SecureCookies:    secureCookies,
+		PollInterval:     pollInterval,
+		HistoryLimit:     historyLimit,
+		GameDataEnabled:  gameDataEnabled,
+		GameDataInterval: gameDataInterval,
 	}
 
 	var missing []string
@@ -75,6 +89,9 @@ func Load() (Config, error) {
 	}
 	if cfg.HistoryLimit < time.Hour {
 		return Config{}, errors.New("HISTORY_RETENTION must be at least 1h")
+	}
+	if cfg.GameDataEnabled && cfg.GameDataInterval < 15*time.Second {
+		return Config{}, errors.New("GAME_DATA_POLL_INTERVAL must be at least 15s")
 	}
 
 	cfg.DataPath, err = filepath.Abs(cfg.DataPath)

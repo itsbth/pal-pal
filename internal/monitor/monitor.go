@@ -16,6 +16,7 @@ type API interface {
 	Info(context.Context) (domain.ServerInfo, error)
 	Players(context.Context) ([]domain.Player, error)
 	Metrics(context.Context) (domain.Metrics, error)
+	GameData(context.Context) (domain.GameData, error)
 }
 
 type MetricsStore interface {
@@ -24,23 +25,37 @@ type MetricsStore interface {
 }
 
 type Monitor struct {
-	api       API
-	store     MetricsStore
-	interval  time.Duration
-	retention time.Duration
-	log       *slog.Logger
+	api              API
+	store            MetricsStore
+	interval         time.Duration
+	retention        time.Duration
+	gameDataEnabled  bool
+	gameDataInterval time.Duration
+	log              *slog.Logger
 
 	mu       sync.RWMutex
 	snapshot domain.Snapshot
 }
 
-func New(api API, store MetricsStore, interval, retention time.Duration, log *slog.Logger) *Monitor {
+type Config struct {
+	PollInterval     time.Duration
+	HistoryRetention time.Duration
+	GameDataEnabled  bool
+	GameDataInterval time.Duration
+}
+
+func New(api API, store MetricsStore, cfg Config, log *slog.Logger) *Monitor {
 	return &Monitor{
-		api:       api,
-		store:     store,
-		interval:  interval,
-		retention: retention,
-		log:       log,
+		api:              api,
+		store:            store,
+		interval:         cfg.PollInterval,
+		retention:        cfg.HistoryRetention,
+		gameDataEnabled:  cfg.GameDataEnabled,
+		gameDataInterval: cfg.GameDataInterval,
+		log:              log,
+		snapshot: domain.Snapshot{
+			GameDataEnabled: cfg.GameDataEnabled,
+		},
 	}
 }
 
@@ -50,11 +65,15 @@ func (m *Monitor) Snapshot() domain.Snapshot {
 
 	snapshot := m.snapshot
 	snapshot.Players = append([]domain.Player(nil), snapshot.Players...)
+	snapshot.GameData.Actors = append([]domain.WorldActor(nil), snapshot.GameData.Actors...)
 	return snapshot
 }
 
 func (m *Monitor) Run(ctx context.Context) error {
 	m.poll(ctx)
+	if m.gameDataEnabled {
+		m.pollGameData(ctx)
+	}
 
 	pollTicker := time.NewTicker(m.interval)
 	defer pollTicker.Stop()
@@ -62,12 +81,22 @@ func (m *Monitor) Run(ctx context.Context) error {
 	cleanupTicker := time.NewTicker(time.Hour)
 	defer cleanupTicker.Stop()
 
+	var gameDataC <-chan time.Time
+	var gameDataTicker *time.Ticker
+	if m.gameDataEnabled {
+		gameDataTicker = time.NewTicker(m.gameDataInterval)
+		gameDataC = gameDataTicker.C
+		defer gameDataTicker.Stop()
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-pollTicker.C:
 			m.poll(ctx)
+		case <-gameDataC:
+			m.pollGameData(ctx)
 		case <-cleanupTicker.C:
 			cleanupCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 			err := m.store.DeleteMetricsBefore(cleanupCtx, time.Now().Add(-m.retention))
@@ -76,6 +105,25 @@ func (m *Monitor) Run(ctx context.Context) error {
 				m.log.Error("clean metric history", "error", err)
 			}
 		}
+	}
+}
+
+func (m *Monitor) pollGameData(ctx context.Context) {
+	gameData, err := m.api.GameData(ctx)
+	now := time.Now()
+
+	m.mu.Lock()
+	if err == nil {
+		gameData.RecordedAt = now
+		m.snapshot.GameData = gameData
+		m.snapshot.GameDataError = ""
+	} else {
+		m.snapshot.GameDataError = err.Error()
+	}
+	m.mu.Unlock()
+
+	if err != nil {
+		m.log.Warn("game data poll failed", "error", err)
 	}
 }
 

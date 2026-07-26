@@ -40,6 +40,55 @@
     <dd>{{.Snapshot.Metrics.Days}}</dd>
   </div>
 </dl>
+{{if .Snapshot.GameDataEnabled}}
+<section class="world-snapshot" aria-labelledby="world-snapshot-title">
+  <div class="world-snapshot-heading">
+    <div>
+      <p class="eyebrow">Optional world data</p>
+      <h3 id="world-snapshot-title">World snapshot</h3>
+    </div>
+    <span class="refresh-note">
+      {{if .Snapshot.GameData.RecordedAt.IsZero}}Waiting for first snapshot{{else}}Updated {{formatTime .Snapshot.GameData.RecordedAt}}{{end}}
+    </span>
+  </div>
+  {{if .Snapshot.GameDataError}}
+  <div class="notice notice-warning" role="status">
+    <strong>World data is unavailable.</strong>
+    <span>{{.Snapshot.GameDataError}}</span>
+  </div>
+  {{end}}
+  {{if not .Snapshot.GameData.RecordedAt.IsZero}}
+  <dl class="metric-strip world-metric-strip">
+    <div>
+      <dt>World clock</dt>
+      <dd>
+        {{if .Snapshot.GameData.InGameTime}}{{.Snapshot.GameData.InGameTime}}{{else}}—{{end}}
+        <span>day {{.Snapshot.GameData.InGameDays}}</span>
+      </dd>
+    </div>
+    <div>
+      <dt>World actors</dt>
+      <dd>{{.WorldSummary.Actors}}</dd>
+    </div>
+    <div>
+      <dt>Base Pals</dt>
+      <dd>{{.WorldSummary.BasePals}}</dd>
+    </div>
+    <div>
+      <dt>Wild Pals</dt>
+      <dd>{{.WorldSummary.WildPals}}</dd>
+    </div>
+    <div>
+      <dt>Palboxes</dt>
+      <dd>{{.WorldSummary.PalBoxes}}</dd>
+    </div>
+  </dl>
+  <p class="helper-text world-snapshot-note">
+    Snapshot FPS {{printf "%.1f" .Snapshot.GameData.FPS}} · average {{printf "%.1f" .Snapshot.GameData.AverageFPS}}
+  </p>
+  {{end}}
+</section>
+{{end}}
 <div class="overview-links">
   <a class="feature-link" href="/players">
     <span><strong>Players</strong><small>See who is online</small></span>

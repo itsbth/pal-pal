@@ -23,6 +23,7 @@ type pageData struct {
 	Snapshot     domain.Snapshot
 	Players      []playerView
 	Markers      []mapMarker
+	WorldSummary worldSummary
 	Settings     []settingView
 	Metrics      []domain.Metrics
 	FPSPoints    string
@@ -54,6 +55,29 @@ type mapMarker struct {
 type settingView struct {
 	Name  string
 	Value string
+}
+
+type worldSummary struct {
+	Actors   int
+	BasePals int
+	WildPals int
+	PalBoxes int
+}
+
+func summarizeWorld(actors []domain.WorldActor) worldSummary {
+	summary := worldSummary{Actors: len(actors)}
+	for _, actor := range actors {
+		if actor.Type == "PalBox" {
+			summary.PalBoxes++
+		}
+		switch actor.UnitType {
+		case "BaseCampPal":
+			summary.BasePals++
+		case "WildPal":
+			summary.WildPals++
+		}
+	}
+	return summary
 }
 
 func playersForView(players []domain.Player, isAdmin bool) []playerView {

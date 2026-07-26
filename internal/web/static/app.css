@@ -214,6 +214,13 @@ h2 {
   letter-spacing: -0.035em;
 }
 
+h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
 .lede {
   max-width: 52ch;
   margin-bottom: 0;
@@ -321,6 +328,30 @@ h2 {
 .metric-strip-compact {
   grid-template-columns: repeat(4, 1fr);
   padding-top: 0;
+}
+
+.world-snapshot {
+  padding-top: 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.world-snapshot-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.world-snapshot-heading .eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.world-metric-strip {
+  border-bottom: 0;
+}
+
+.world-snapshot-note {
+  margin: -0.65rem 0 1.4rem;
 }
 
 .overview-links {
