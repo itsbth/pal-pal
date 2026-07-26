@@ -103,6 +103,13 @@ docker run --rm \
 `DATA_PATH` defaults to `/data` in the container. For HTTPS deployments,
 terminate TLS at a reverse proxy and set `SECURE_COOKIES=true`.
 
+## Automation
+
+GitHub Actions runs module consistency checks, `go vet`, race-enabled tests,
+a static build, and a complete container build on pull requests and pushes to
+`main`. Renovate tracks Go modules, GitHub Actions, and container base images;
+its best-practices preset pins Actions and Docker images to immutable digests.
+
 ## Scaffold decisions and open work
 
 The original brief did not specify several implementation details. This scaffold uses:
