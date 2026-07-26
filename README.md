@@ -86,6 +86,23 @@ go run ./cmd/pal-pal serve
 
 Then open [http://localhost:8080](http://localhost:8080).
 
+## Container
+
+The two-stage Docker build produces a static Go binary and runs it as the
+distroless `nonroot` user. The image contains no shell or package manager.
+
+```sh
+docker build -t pal-pal .
+docker run --rm \
+  --env-file .env \
+  -p 8080:8080 \
+  -v pal-pal-data:/data \
+  pal-pal
+```
+
+`DATA_PATH` defaults to `/data` in the container. For HTTPS deployments,
+terminate TLS at a reverse proxy and set `SECURE_COOKIES=true`.
+
 ## Scaffold decisions and open work
 
 The original brief did not specify several implementation details. This scaffold uses:

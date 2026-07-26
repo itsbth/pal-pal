@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.env.*
+data
+pal-pal
+
+.devbox
+.direnv
+devbox.json
+devbox.lock
+.envrc
+
+README.md
+PRODUCT.md
