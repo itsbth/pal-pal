@@ -1,0 +1,19 @@
+{{define "content"}}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Connected now</p>
+    <h1>Players</h1>
+  </div>
+  {{if .IsAdmin}}<span class="role-badge role-admin">Admin controls enabled</span>{{end}}
+</header>
+<section
+  id="players-component"
+  class="component-frame"
+  hx-get="/components/players"
+  hx-trigger="load, every 15s"
+  hx-swap="innerHTML"
+  aria-live="polite"
+>
+  <div class="skeleton skeleton-table" aria-label="Loading players"></div>
+</section>
+{{end}}

@@ -1,0 +1,56 @@
+{{if .Snapshot.LastError}}
+<div class="notice notice-warning" role="status">
+  <strong>Live data is incomplete.</strong>
+  <span>{{.Snapshot.LastError}}</span>
+</div>
+{{end}}
+<div class="server-intro">
+  <div>
+    <div class="status-line">
+      <span class="status-dot {{if .Snapshot.UpdatedAt.IsZero}}status-offline{{end}}" aria-hidden="true"></span>
+      <span>{{if .Snapshot.UpdatedAt.IsZero}}Connecting{{else}}Online{{end}}</span>
+    </div>
+    <h2>{{if .Snapshot.Info.ServerName}}{{.Snapshot.Info.ServerName}}{{else}}Palworld server{{end}}</h2>
+    {{if .Snapshot.Info.Description}}<p>{{.Snapshot.Info.Description}}</p>{{end}}
+  </div>
+  <div class="server-meta">
+    <span>Version {{if .Snapshot.Info.Version}}{{.Snapshot.Info.Version}}{{else}}unknown{{end}}</span>
+    <span>Updated {{formatTime .Snapshot.UpdatedAt}}</span>
+  </div>
+</div>
+<dl class="metric-strip">
+  <div>
+    <dt>Players</dt>
+    <dd>{{.Snapshot.Metrics.CurrentPlayerNum}} <span>/ {{.Snapshot.Metrics.MaxPlayerNum}}</span></dd>
+  </div>
+  <div>
+    <dt>Server FPS</dt>
+    <dd>{{.Snapshot.Metrics.ServerFPS}}</dd>
+  </div>
+  <div>
+    <dt>Frame time</dt>
+    <dd>{{printf "%.1f" .Snapshot.Metrics.ServerFrameTime}} <span>ms</span></dd>
+  </div>
+  <div>
+    <dt>Uptime</dt>
+    <dd>{{formatDuration .Snapshot.Metrics.Uptime}}</dd>
+  </div>
+  <div>
+    <dt>World day</dt>
+    <dd>{{.Snapshot.Metrics.Days}}</dd>
+  </div>
+</dl>
+<div class="overview-links">
+  <a class="feature-link" href="/players">
+    <span><strong>Players</strong><small>See who is online</small></span>
+    <span aria-hidden="true">→</span>
+  </a>
+  <a class="feature-link" href="/map">
+    <span><strong>Map</strong><small>Check current locations</small></span>
+    <span aria-hidden="true">→</span>
+  </a>
+  <a class="feature-link" href="/metrics">
+    <span><strong>Metrics</strong><small>Review the last 24 hours</small></span>
+    <span aria-hidden="true">→</span>
+  </a>
+</div>

@@ -1,0 +1,51 @@
+{{if .Error}}<div class="notice notice-error" role="alert">{{.Error}}</div>{{end}}
+{{if .Metrics}}
+<dl class="metric-strip metric-strip-compact">
+  <div><dt>FPS now</dt><dd>{{.Snapshot.Metrics.ServerFPS}}</dd></div>
+  <div><dt>Players now</dt><dd>{{.Snapshot.Metrics.CurrentPlayerNum}}</dd></div>
+  <div><dt>Frame time</dt><dd>{{printf "%.1f" .Snapshot.Metrics.ServerFrameTime}} <span>ms</span></dd></div>
+  <div><dt>Base camps</dt><dd>{{.Snapshot.Metrics.BaseCampNum}}</dd></div>
+</dl>
+<div class="chart-stack">
+  <figure class="chart">
+    <figcaption><strong>Server FPS</strong><span>{{.ChartStart}} to {{.ChartEnd}}</span></figcaption>
+    <svg viewBox="0 0 800 210" role="img" aria-label="Server FPS over the last 24 hours">
+      <line x1="32" y1="184" x2="768" y2="184" class="chart-axis"/>
+      <line x1="32" y1="16" x2="32" y2="184" class="chart-axis"/>
+      <polyline points="{{.FPSPoints}}" class="chart-line chart-line-fps"/>
+    </svg>
+  </figure>
+  <figure class="chart">
+    <figcaption><strong>Online players</strong><span>{{.ChartStart}} to {{.ChartEnd}}</span></figcaption>
+    <svg viewBox="0 0 800 210" role="img" aria-label="Online players over the last 24 hours">
+      <line x1="32" y1="184" x2="768" y2="184" class="chart-axis"/>
+      <line x1="32" y1="16" x2="32" y2="184" class="chart-axis"/>
+      <polyline points="{{.PlayerPoints}}" class="chart-line chart-line-players"/>
+    </svg>
+  </figure>
+</div>
+<details class="history-table">
+  <summary>View recent samples</summary>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Recorded</th><th>FPS</th><th>Players</th><th>Frame time</th><th>Uptime</th></tr></thead>
+      <tbody>
+        {{range .Metrics}}
+        <tr>
+          <td>{{formatDateTime .RecordedAt}}</td>
+          <td>{{.ServerFPS}}</td>
+          <td>{{.CurrentPlayerNum}} / {{.MaxPlayerNum}}</td>
+          <td>{{printf "%.1f" .ServerFrameTime}} ms</td>
+          <td>{{formatDuration .Uptime}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</details>
+{{else if not .Error}}
+<div class="empty-state">
+  <strong>Collecting the first sample</strong>
+  <span>Metric graphs will appear after the monitor completes a successful poll.</span>
+</div>
+{{end}}

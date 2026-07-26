@@ -1,0 +1,40 @@
+{{if .Snapshot.LastError}}
+<div class="notice notice-warning" role="status">Locations may be stale. {{.Snapshot.LastError}}</div>
+{{end}}
+{{if .Markers}}
+<div class="map-layout">
+  <div class="coordinate-map">
+    <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title map-desc">
+      <title id="map-title">Relative player locations</title>
+      <desc id="map-desc">A coordinate plot of the players currently online.</desc>
+      <defs>
+        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+          <path d="M 10 0 L 0 0 0 10" fill="none" class="map-grid"/>
+        </pattern>
+      </defs>
+      <rect width="100" height="100" rx="2" class="map-surface"/>
+      <rect width="100" height="100" rx="2" fill="url(#grid)"/>
+      {{range .Markers}}
+      <g transform="translate({{printf "%.2f" .X}} {{printf "%.2f" .Y}})">
+        <circle r="2.1" class="map-marker-ring"/>
+        <circle r="1.1" class="map-marker"/>
+      </g>
+      {{end}}
+    </svg>
+  </div>
+  <ol class="map-legend">
+    {{range .Markers}}
+    <li>
+      <span class="legend-dot" aria-hidden="true"></span>
+      <span><strong>{{.Name}}</strong><small>{{printf "%.0f" .RawX}}, {{printf "%.0f" .RawY}}</small></span>
+    </li>
+    {{end}}
+  </ol>
+</div>
+<p class="helper-text">This scaffold plots current players relative to one another. Add a calibrated map image and world bounds when those assets are selected.</p>
+{{else}}
+<div class="empty-state map-empty">
+  <strong>No player locations to plot</strong>
+  <span>The map will populate when someone joins the server.</span>
+</div>
+{{end}}

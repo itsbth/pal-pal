@@ -1,0 +1,79 @@
+{{if .Flash}}<div class="notice notice-success" role="status">{{.Flash}}</div>{{end}}
+{{if .Error}}<div class="notice notice-error" role="alert">{{.Error}}</div>{{end}}
+{{if .Snapshot.LastError}}
+<div class="notice notice-warning" role="status">Player data may be stale. {{.Snapshot.LastError}}</div>
+{{end}}
+{{if .IsAdmin}}
+<details class="admin-tool">
+  <summary>Unban a player</summary>
+  <form
+    class="inline-form"
+    method="post"
+    action="/admin/players/unban"
+    hx-post="/admin/players/unban"
+    hx-target="#players-component"
+  >
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <label for="unban-user-id">User ID</label>
+    <input id="unban-user-id" name="user_id" required maxlength="128" placeholder="steam_…">
+    <button class="button button-primary" type="submit">Unban</button>
+  </form>
+</details>
+{{end}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Player</th>
+        <th scope="col">Level</th>
+        <th scope="col">Ping</th>
+        <th scope="col">Buildings</th>
+        {{if .IsAdmin}}<th scope="col">IP address</th><th scope="col"><span class="visually-hidden">Actions</span></th>{{end}}
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Players}}
+      <tr>
+        <td>
+          <strong>{{.Name}}</strong>
+          <small>{{if .AccountName}}{{.AccountName}}{{else}}{{.UserID}}{{end}}</small>
+        </td>
+        <td>{{.Level}}</td>
+        <td>{{printf "%.0f" .Ping}} ms</td>
+        <td>{{.BuildingCount}}</td>
+        {{if $.IsAdmin}}
+        <td><code>{{.IP}}</code></td>
+        <td>
+          <details class="action-menu">
+            <summary class="button button-quiet button-small">Manage</summary>
+            <div class="action-popover">
+              <form method="post" action="/admin/players/kick" hx-post="/admin/players/kick" hx-target="#players-component">
+                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                <input type="hidden" name="user_id" value="{{.UserID}}">
+                <label>Message <input name="message" maxlength="500" placeholder="Optional"></label>
+                <button class="button button-quiet" type="submit">Kick</button>
+              </form>
+              <form method="post" action="/admin/players/ban" hx-post="/admin/players/ban" hx-target="#players-component">
+                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                <input type="hidden" name="user_id" value="{{.UserID}}">
+                <input type="hidden" name="message" value="">
+                <button class="button button-danger" type="submit">Ban player</button>
+              </form>
+            </div>
+          </details>
+        </td>
+        {{end}}
+      </tr>
+      {{else}}
+      <tr>
+        <td colspan="{{if .IsAdmin}}6{{else}}4{{end}}">
+          <div class="empty-state">
+            <strong>No players online</strong>
+            <span>Connected players will appear here after the next poll.</span>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>

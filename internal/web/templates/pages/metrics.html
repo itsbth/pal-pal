@@ -1,0 +1,18 @@
+{{define "content"}}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Last 24 hours</p>
+    <h1>Metrics</h1>
+  </div>
+  <span class="refresh-note">Stored locally in SQLite</span>
+</header>
+<section
+  class="component-frame"
+  hx-get="/components/metrics"
+  hx-trigger="load, every 30s"
+  hx-swap="innerHTML"
+  aria-live="polite"
+>
+  <div class="skeleton skeleton-charts" aria-label="Loading metrics"></div>
+</section>
+{{end}}

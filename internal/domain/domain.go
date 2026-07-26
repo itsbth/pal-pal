@@ -1,0 +1,42 @@
+package domain
+
+import "time"
+
+type ServerInfo struct {
+	Version     string `json:"version"`
+	ServerName  string `json:"servername"`
+	Description string `json:"description"`
+	WorldGUID   string `json:"worldguid"`
+}
+
+type Player struct {
+	Name          string  `json:"name"`
+	AccountName   string  `json:"accountName"`
+	PlayerID      string  `json:"playerId"`
+	UserID        string  `json:"userId"`
+	IP            string  `json:"ip"`
+	Ping          float64 `json:"ping"`
+	LocationX     float64 `json:"location_x"`
+	LocationY     float64 `json:"location_y"`
+	Level         int     `json:"level"`
+	BuildingCount int     `json:"building_count"`
+}
+
+type Metrics struct {
+	ServerFPS        int     `json:"serverfps"`
+	CurrentPlayerNum int     `json:"currentplayernum"`
+	ServerFrameTime  float64 `json:"serverframetime"`
+	MaxPlayerNum     int     `json:"maxplayernum"`
+	Uptime           int64   `json:"uptime"`
+	BaseCampNum      int     `json:"basecampnum"`
+	Days             int     `json:"days"`
+	RecordedAt       time.Time
+}
+
+type Snapshot struct {
+	Info      ServerInfo
+	Players   []Player
+	Metrics   Metrics
+	UpdatedAt time.Time
+	LastError string
+}

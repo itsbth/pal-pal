@@ -1,0 +1,18 @@
+{{define "content"}}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Current positions</p>
+    <h1>Player map</h1>
+  </div>
+  <span class="refresh-note">Relative coordinate view</span>
+</header>
+<section
+  class="component-frame"
+  hx-get="/components/map"
+  hx-trigger="load, every 15s"
+  hx-swap="innerHTML"
+  aria-live="polite"
+>
+  <div class="skeleton skeleton-map" aria-label="Loading player map"></div>
+</section>
+{{end}}

@@ -1,0 +1,45 @@
+{{define "layout"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{{if .Title}}{{.Title}} · {{end}}Pal-pal</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  {{if ne .Active "login"}}
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Pal-pal overview">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <span>Pal-pal</span>
+    </a>
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="/" {{if eq .Active "overview"}}aria-current="page"{{end}}>Overview</a>
+      <a href="/players" {{if eq .Active "players"}}aria-current="page"{{end}}>Players</a>
+      <a href="/map" {{if eq .Active "map"}}aria-current="page"{{end}}>Map</a>
+      <a href="/metrics" {{if eq .Active "metrics"}}aria-current="page"{{end}}>Metrics</a>
+      {{if .IsAdmin}}<a href="/settings" {{if eq .Active "settings"}}aria-current="page"{{end}}>Settings</a>{{end}}
+    </nav>
+    <div class="account">
+      <span class="role-badge">{{.Role}}</span>
+      {{if .CanSignOut}}
+      <form method="post" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <button class="button button-quiet button-small" type="submit">Sign out</button>
+      </form>
+      {{else}}
+      <a class="button button-quiet button-small" href="/login">Admin sign in</a>
+      {{end}}
+    </div>
+  </header>
+  {{end}}
+  <main id="main" class="{{if eq .Active "login"}}login-shell{{else}}page-shell{{end}}">
+    {{template "content" .}}
+  </main>
+</body>
+</html>
+{{end}}
