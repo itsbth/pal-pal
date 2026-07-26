@@ -19,14 +19,15 @@ type API interface {
 	GameData(context.Context) (domain.GameData, error)
 }
 
-type MetricsStore interface {
+type HistoryStore interface {
 	RecordMetrics(context.Context, domain.Metrics) error
-	DeleteMetricsBefore(context.Context, time.Time) error
+	RecordPlayerStats(context.Context, []domain.Player, time.Time) error
+	DeleteHistoryBefore(context.Context, time.Time) error
 }
 
 type Monitor struct {
 	api              API
-	store            MetricsStore
+	store            HistoryStore
 	interval         time.Duration
 	retention        time.Duration
 	gameDataEnabled  bool
@@ -44,7 +45,7 @@ type Config struct {
 	GameDataInterval time.Duration
 }
 
-func New(api API, store MetricsStore, cfg Config, log *slog.Logger) *Monitor {
+func New(api API, store HistoryStore, cfg Config, log *slog.Logger) *Monitor {
 	return &Monitor{
 		api:              api,
 		store:            store,
@@ -99,10 +100,10 @@ func (m *Monitor) Run(ctx context.Context) error {
 			m.pollGameData(ctx)
 		case <-cleanupTicker.C:
 			cleanupCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-			err := m.store.DeleteMetricsBefore(cleanupCtx, time.Now().Add(-m.retention))
+			err := m.store.DeleteHistoryBefore(cleanupCtx, time.Now().Add(-m.retention))
 			cancel()
 			if err != nil {
-				m.log.Error("clean metric history", "error", err)
+				m.log.Error("clean history", "error", err)
 			}
 		}
 	}
@@ -144,6 +145,8 @@ func (m *Monitor) poll(ctx context.Context) {
 	}
 	if playersErr != nil {
 		errs = append(errs, fmt.Errorf("players: %w", playersErr))
+	} else if err := m.store.RecordPlayerStats(ctx, players, now); err != nil {
+		errs = append(errs, err)
 	}
 	if metricsErr != nil {
 		errs = append(errs, fmt.Errorf("metrics: %w", metricsErr))

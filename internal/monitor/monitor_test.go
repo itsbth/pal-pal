@@ -15,6 +15,8 @@ type fakeAPI struct {
 	gameData      domain.GameData
 	gameDataErr   error
 	gameDataCalls int
+	players       []domain.Player
+	playersErr    error
 }
 
 func (f *fakeAPI) Info(context.Context) (domain.ServerInfo, error) {
@@ -22,7 +24,7 @@ func (f *fakeAPI) Info(context.Context) (domain.ServerInfo, error) {
 }
 
 func (f *fakeAPI) Players(context.Context) ([]domain.Player, error) {
-	return nil, nil
+	return f.players, f.playersErr
 }
 
 func (f *fakeAPI) Metrics(context.Context) (domain.Metrics, error) {
@@ -34,13 +36,20 @@ func (f *fakeAPI) GameData(context.Context) (domain.GameData, error) {
 	return f.gameData, f.gameDataErr
 }
 
-type fakeMetricsStore struct{}
+type fakeHistoryStore struct {
+	playerSnapshots [][]domain.Player
+}
 
-func (fakeMetricsStore) RecordMetrics(context.Context, domain.Metrics) error {
+func (*fakeHistoryStore) RecordMetrics(context.Context, domain.Metrics) error {
 	return nil
 }
 
-func (fakeMetricsStore) DeleteMetricsBefore(context.Context, time.Time) error {
+func (f *fakeHistoryStore) RecordPlayerStats(_ context.Context, players []domain.Player, _ time.Time) error {
+	f.playerSnapshots = append(f.playerSnapshots, append([]domain.Player(nil), players...))
+	return nil
+}
+
+func (*fakeHistoryStore) DeleteHistoryBefore(context.Context, time.Time) error {
 	return nil
 }
 
@@ -50,7 +59,7 @@ func testLogger() *slog.Logger {
 
 func TestRunSkipsGameDataWhenDisabled(t *testing.T) {
 	api := &fakeAPI{}
-	monitor := New(api, fakeMetricsStore{}, Config{
+	monitor := New(api, &fakeHistoryStore{}, Config{
 		PollInterval:     time.Minute,
 		HistoryRetention: time.Hour,
 		GameDataInterval: time.Minute,
@@ -76,7 +85,7 @@ func TestGameDataFailureIsIsolated(t *testing.T) {
 			Actors:     []domain.WorldActor{{Type: "PalBox"}},
 		},
 	}
-	monitor := New(api, fakeMetricsStore{}, Config{
+	monitor := New(api, &fakeHistoryStore{}, Config{
 		PollInterval:     time.Minute,
 		HistoryRetention: time.Hour,
 		GameDataEnabled:  true,
@@ -100,5 +109,28 @@ func TestGameDataFailureIsIsolated(t *testing.T) {
 	}
 	if second.LastError != "" {
 		t.Fatalf("LastError = %q", second.LastError)
+	}
+}
+
+func TestPollRecordsPlayersOnlyAfterSuccessfulPlayerPoll(t *testing.T) {
+	api := &fakeAPI{
+		players: []domain.Player{{Name: "Moss", UserID: "steam_1", Level: 12}},
+	}
+	history := &fakeHistoryStore{}
+	monitor := New(api, history, Config{
+		PollInterval:     time.Minute,
+		HistoryRetention: time.Hour,
+	}, testLogger())
+
+	monitor.poll(context.Background())
+	if len(history.playerSnapshots) != 1 || len(history.playerSnapshots[0]) != 1 {
+		t.Fatalf("player snapshots = %#v", history.playerSnapshots)
+	}
+
+	api.playersErr = errors.New("players unavailable")
+	api.players = nil
+	monitor.poll(context.Background())
+	if len(history.playerSnapshots) != 1 {
+		t.Fatalf("failed poll recorded a snapshot: %#v", history.playerSnapshots)
 	}
 }

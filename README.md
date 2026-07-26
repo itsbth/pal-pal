@@ -10,6 +10,7 @@ It keeps the upstream API credentials on the server, exposes a read-only view wh
 - Player list with admin-only IP addresses, kick, ban, and unban controls
 - Approximate world-coordinate plot for online player locations, with an optional local map image
 - SQLite-backed metrics history with Go-emitted SVG graphs
+- Retained player presence, position, and level samples for future timelines
 - Optional world snapshots with in-game time and aggregate actor counts
 - Admin-only full server settings
 - In-memory cookie sessions with CSRF-protected administrative actions
@@ -35,10 +36,13 @@ internal/store       SQLite migrations and metric history
 internal/web         ServeMux routes, sessions, templates, and assets
 ```
 
-The monitor polls `/info`, `/players`, and `/metrics`. Successful metric samples
-are recorded independently, so a temporary failure from one endpoint does not
-discard previously healthy snapshot data. When enabled, `/game-data` runs on its
-own slower schedule and its failures do not affect the core server status.
+The monitor polls `/info`, `/players`, and `/metrics`. Successful metric and
+player samples are recorded independently, so a temporary failure from one
+endpoint does not discard previously healthy snapshot data. Player history
+stores online state, display name, stable player identifiers, position, and
+level, including account names for identity, but never IP addresses. When
+enabled, `/game-data` runs on its own slower schedule and its failures do not
+affect the core server status.
 
 ## Access model
 
@@ -67,7 +71,7 @@ Copy `.env.example` to `.env` and set:
 | `MAP_IMAGE_PATH` | no | `main.webp` beside the database | Optional map image shown behind player markers |
 | `LISTEN_ADDRESS` | no | `:8080` | HTTP listen address |
 | `POLL_INTERVAL` | no | `15s` | Live polling and metric sample interval |
-| `HISTORY_RETENTION` | no | `720h` | Metric retention duration |
+| `HISTORY_RETENTION` | no | `720h` | Metric and player-stat retention duration |
 | `GAME_DATA_ENABLED` | no | `false` | Poll the optional `/game-data` world snapshot endpoint |
 | `GAME_DATA_POLL_INTERVAL` | no | `1m` | World snapshot interval; must be at least 15 seconds |
 | `SECURE_COOKIES` | no | `false` | Mark session cookies HTTPS-only |

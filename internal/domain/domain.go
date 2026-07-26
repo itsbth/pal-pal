@@ -22,6 +22,21 @@ type Player struct {
 	BuildingCount int     `json:"building_count"`
 }
 
+// PlayerStat is a retained observation used to build player timelines.
+// Position and level are nil while the player is offline.
+type PlayerStat struct {
+	PlayerKey   string
+	Name        string
+	AccountName string
+	PlayerID    string
+	UserID      string
+	Online      bool
+	LocationX   *float64
+	LocationY   *float64
+	Level       *int
+	RecordedAt  time.Time
+}
+
 type Metrics struct {
 	ServerFPS        int     `json:"serverfps"`
 	CurrentPlayerNum int     `json:"currentplayernum"`
