@@ -8,7 +8,7 @@ It keeps the upstream API credentials on the server, exposes a read-only view wh
 
 - Live server status and activity
 - Player list with admin-only IP addresses, kick, ban, and unban controls
-- Relative coordinate plot for online player locations, with an optional local map image
+- Approximate world-coordinate plot for online player locations, with an optional local map image
 - SQLite-backed metrics history with Go-emitted SVG graphs
 - Optional world snapshots with in-game time and aggregate actor counts
 - Admin-only full server settings
@@ -78,7 +78,8 @@ When `API_ROOT` contains no path, Pal-pal automatically appends the documented `
 To enable the map preview, place a browser-compatible image at `data/main.webp`
 when using the default data path, or point `MAP_IMAGE_PATH` at another local
 image. The image is served only to users who can access the map. Marker
-coordinates remain relative until the map bounds are calibrated.
+placement uses a provisional fixed calibration that can be refined with
+additional reference points.
 
 World snapshots are disabled by default because `/game-data` must be enabled on
 the Palworld server and may return a much larger response than the core
@@ -135,7 +136,7 @@ The original brief did not specify several implementation details. This scaffold
 - A 15-second poll interval and 30-day metric retention
 - Go-emitted SVG graphs rather than a browser charting dependency
 - Field-level read restrictions in addition to admin-only routes
-- A relative player coordinate plot with optional local map imagery
+- An approximate world-coordinate plot with optional local map imagery
 - One shared viewer password and one shared admin password
 - In-memory 12-hour sessions
 

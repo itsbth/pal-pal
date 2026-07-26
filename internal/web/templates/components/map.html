@@ -5,8 +5,8 @@
 <div class="map-layout{{if not .Markers}} map-layout-solo{{end}}">
   <div class="coordinate-map">
     <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title map-desc">
-      <title id="map-title">{{if .MapImageURL}}Player locations on the configured map{{else}}Relative player locations{{end}}</title>
-      <desc id="map-desc">{{if .MapImageURL}}An uncalibrated map preview with markers for the players currently online.{{else}}A coordinate plot of the players currently online.{{end}}</desc>
+      <title id="map-title">{{if .MapImageURL}}Player locations on the configured map{{else}}Player world locations{{end}}</title>
+      <desc id="map-desc">An approximate world-coordinate plot of the players currently online.</desc>
       <rect width="100" height="100" rx="2" class="map-surface"/>
       {{if .MapImageURL}}
       <image href="{{.MapImageURL}}" width="100" height="100" preserveAspectRatio="xMidYMid meet" class="map-image"/>
@@ -43,9 +43,9 @@
   {{end}}
 </div>
 {{if .MapImageURL}}
-<p class="helper-text">Map preview enabled. Player markers are still positioned relative to one another and are not calibrated to landmarks yet.</p>
+<p class="helper-text">Marker placement uses a provisional fixed calibration for this map image.</p>
 {{else}}
-<p class="helper-text">This scaffold plots current players relative to one another. Add <code>main.webp</code> beside the database, or set <code>MAP_IMAGE_PATH</code>, to show a map preview.</p>
+<p class="helper-text">Locations use provisional fixed world coordinates. Add <code>main.webp</code> beside the database, or set <code>MAP_IMAGE_PATH</code>, to show a map preview.</p>
 {{end}}
 {{else}}
 <div class="empty-state map-empty">

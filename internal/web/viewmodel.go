@@ -65,6 +65,14 @@ type worldSummary struct {
 	PalBoxes int
 }
 
+const (
+	mapCalibrationWorldX = -357558.0
+	mapCalibrationWorldY = 268878.0
+	mapCalibrationSVGX   = 68.62
+	mapCalibrationSVGY   = 48.76
+	mapWorldSpan         = 1447840.0
+)
+
 func summarizeWorld(actors []domain.WorldActor) worldSummary {
 	summary := worldSummary{Actors: len(actors)}
 	for _, actor := range actors {
@@ -108,35 +116,26 @@ func markersForView(players []domain.Player) []mapMarker {
 		return nil
 	}
 
-	minX, maxX := players[0].LocationX, players[0].LocationX
-	minY, maxY := players[0].LocationY, players[0].LocationY
-	for _, player := range players[1:] {
-		minX = math.Min(minX, player.LocationX)
-		maxX = math.Max(maxX, player.LocationX)
-		minY = math.Min(minY, player.LocationY)
-		maxY = math.Max(maxY, player.LocationY)
-	}
-
-	rangeX := maxX - minX
-	rangeY := maxY - minY
-	if rangeX == 0 {
-		rangeX = 1
-	}
-	if rangeY == 0 {
-		rangeY = 1
-	}
-
 	result := make([]mapMarker, 0, len(players))
 	for _, player := range players {
+		x, y := mapPosition(player.LocationX, player.LocationY)
 		result = append(result, mapMarker{
 			Name: player.Name,
-			X:    7 + ((player.LocationX-minX)/rangeX)*86,
-			Y:    93 - ((player.LocationY-minY)/rangeY)*86,
+			X:    x,
+			Y:    y,
 			RawX: player.LocationX,
 			RawY: player.LocationY,
 		})
 	}
 	return result
+}
+
+func mapPosition(worldX, worldY float64) (float64, float64) {
+	// Palworld's world axes are swapped on the map: world Y runs left-to-right,
+	// while increasing world X runs bottom-to-top.
+	x := mapCalibrationSVGX + ((worldY - mapCalibrationWorldY) / mapWorldSpan * 100)
+	y := mapCalibrationSVGY - ((worldX - mapCalibrationWorldX) / mapWorldSpan * 100)
+	return x, y
 }
 
 func settingsForView(settings map[string]any) []settingView {

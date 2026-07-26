@@ -38,3 +38,30 @@ func TestSummarizeWorld(t *testing.T) {
 		t.Fatalf("summarizeWorld() = %#v", summary)
 	}
 }
+
+func TestMarkersUseFixedMapCalibration(t *testing.T) {
+	anchor := domain.Player{
+		Name:      "Moss",
+		LocationX: -357558,
+		LocationY: 268878,
+	}
+
+	marker := markersForView([]domain.Player{anchor})[0]
+	if marker.X != 68.62 || marker.Y != 48.76 {
+		t.Fatalf("anchor marker = (%.4f, %.4f), want (68.62, 48.76)", marker.X, marker.Y)
+	}
+
+	markerWithCompany := markersForView([]domain.Player{
+		anchor,
+		{Name: "Fox", LocationX: 100000, LocationY: -100000},
+	})[0]
+	if markerWithCompany.X != marker.X || markerWithCompany.Y != marker.Y {
+		t.Fatalf(
+			"anchor moved from (%.4f, %.4f) to (%.4f, %.4f) when another player joined",
+			marker.X,
+			marker.Y,
+			markerWithCompany.X,
+			markerWithCompany.Y,
+		)
+	}
+}

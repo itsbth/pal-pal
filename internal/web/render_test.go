@@ -84,7 +84,7 @@ func TestMapRendersOptionalImageBehindMarkers(t *testing.T) {
 	for _, expected := range []string{
 		`<image href="/map-image"`,
 		`translate(42.00 58.00)`,
-		"not calibrated to landmarks yet",
+		"provisional fixed calibration",
 	} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("map does not contain %q", expected)
