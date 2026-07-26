@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/itsbth/pal-pal/internal/domain"
-	_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite" // Register the SQLite database driver.
 )
 
 type Store struct {
@@ -115,7 +115,9 @@ func (s *Store) RecordPlayerStats(ctx context.Context, players []domain.Player, 
 	if err != nil {
 		return fmt.Errorf("begin player stat transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	previouslyOnline, err := onlinePlayerStates(ctx, tx)
 	if err != nil {
@@ -194,7 +196,9 @@ LIMIT ?`, since.UnixMilli(), limit)
 	if err != nil {
 		return nil, fmt.Errorf("query recent player stats: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var samples []domain.PlayerStat
 	for rows.Next() {
@@ -255,7 +259,9 @@ WHERE online = 1`)
 	if err != nil {
 		return nil, fmt.Errorf("query online player states: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	players := make(map[string]storedPlayerState)
 	for rows.Next() {
@@ -333,7 +339,9 @@ LIMIT ?`, since.Unix(), limit)
 	if err != nil {
 		return nil, fmt.Errorf("query recent metrics: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var samples []domain.Metrics
 	for rows.Next() {
@@ -365,7 +373,9 @@ func (s *Store) DeleteHistoryBefore(ctx context.Context, cutoff time.Time) (err 
 	if err != nil {
 		return fmt.Errorf("begin history cleanup: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	if _, err = tx.ExecContext(ctx, "DELETE FROM metric_samples WHERE recorded_at < ?", cutoff.Unix()); err != nil {
 		return fmt.Errorf("delete old metrics: %w", err)

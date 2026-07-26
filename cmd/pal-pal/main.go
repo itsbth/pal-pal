@@ -49,7 +49,7 @@ func newServeCommand() *cobra.Command {
 	}
 }
 
-func run(parent context.Context) error {
+func run(parent context.Context) (returnErr error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -65,7 +65,9 @@ func run(parent context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer database.Close()
+	defer func() {
+		returnErr = errors.Join(returnErr, database.Close())
+	}()
 
 	serverMonitor := monitor.New(api, database, monitor.Config{
 		PollInterval:     cfg.PollInterval,

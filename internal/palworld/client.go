@@ -127,7 +127,9 @@ func (c *Client) do(ctx context.Context, method, path string, body any, destinat
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", method, path, err)
 	}
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	limited := io.LimitReader(response.Body, maxResponseSize)
 	if response.StatusCode < 200 || response.StatusCode >= 300 {

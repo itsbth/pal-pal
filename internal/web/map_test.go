@@ -16,7 +16,7 @@ func TestMapImageServesConfiguredFile(t *testing.T) {
 	}
 
 	server := &Server{mapImagePath: path}
-	request := httptest.NewRequest(http.MethodGet, "/map-image", nil)
+	request := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/map-image", nil)
 	response := httptest.NewRecorder()
 
 	server.mapImage(response, request, session{})
@@ -37,7 +37,7 @@ func TestMapImageServesConfiguredFile(t *testing.T) {
 
 func TestMapImageReturnsNotFoundWhenUnavailable(t *testing.T) {
 	server := &Server{mapImagePath: filepath.Join(t.TempDir(), "missing.webp")}
-	request := httptest.NewRequest(http.MethodGet, "/map-image", nil)
+	request := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/map-image", nil)
 	response := httptest.NewRecorder()
 
 	server.mapImage(response, request, session{})

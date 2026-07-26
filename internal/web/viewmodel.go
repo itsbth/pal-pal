@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -162,13 +163,13 @@ func graphPoints(samples []domain.Metrics, value func(domain.Metrics) float64) s
 	)
 
 	var points strings.Builder
-	for index := len(samples) - 1; index >= 0; index-- {
+	for index, sample := range slices.Backward(samples) {
 		position := len(samples) - 1 - index
 		x := left
 		if len(samples) > 1 {
 			x += (float64(position) / float64(len(samples)-1)) * width
 		}
-		y := top + height - (value(samples[index])/maxValue)*height
+		y := top + height - (value(sample)/maxValue)*height
 		if points.Len() > 0 {
 			points.WriteByte(' ')
 		}

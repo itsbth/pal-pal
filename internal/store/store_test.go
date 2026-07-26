@@ -14,7 +14,11 @@ func TestRecordPlayerStatsIncludesOfflineTransitions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open() error = %v", err)
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			t.Errorf("Close() error = %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 	start := time.Date(2026, time.July, 26, 12, 0, 0, 0, time.UTC)
@@ -81,7 +85,11 @@ func TestPlayerStatsUseFallbackIdentityAndDeduplicate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open() error = %v", err)
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			t.Errorf("Close() error = %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 	recordedAt := time.Now()
@@ -123,7 +131,11 @@ func TestRecordPlayerStatsTracksOfflineTransitionAcrossRestart(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open(second) error = %v", err)
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			t.Errorf("Close() error = %v", err)
+		}
+	}()
 	if err := database.RecordPlayerStats(ctx, nil, start.Add(time.Minute)); err != nil {
 		t.Fatalf("RecordPlayerStats(offline) error = %v", err)
 	}
@@ -142,7 +154,11 @@ func TestDeleteHistoryBeforeRemovesPlayerSamples(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open() error = %v", err)
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			t.Errorf("Close() error = %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 	start := time.Date(2026, time.July, 26, 12, 0, 0, 0, time.UTC)

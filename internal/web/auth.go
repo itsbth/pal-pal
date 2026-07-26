@@ -74,7 +74,7 @@ func (s *sessions) create(w http.ResponseWriter, access role) (session, error) {
 	s.entries[token] = value
 	s.mu.Unlock()
 
-	http.SetCookie(w, &http.Cookie{
+	http.SetCookie(w, &http.Cookie{ //nolint:gosec // Secure is configuration-driven to support local HTTP deployments.
 		Name:     sessionCookieName,
 		Value:    token,
 		Path:     "/",
@@ -115,7 +115,7 @@ func (s *sessions) destroy(w http.ResponseWriter, r *http.Request) {
 		delete(s.entries, cookie.Value)
 		s.mu.Unlock()
 	}
-	http.SetCookie(w, &http.Cookie{
+	http.SetCookie(w, &http.Cookie{ //nolint:gosec // Secure is configuration-driven to support local HTTP deployments.
 		Name:     sessionCookieName,
 		Value:    "",
 		Path:     "/",

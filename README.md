@@ -97,6 +97,7 @@ With Devbox:
 
 ```sh
 devbox run test
+devbox run lint
 devbox run run
 ```
 
@@ -128,9 +129,9 @@ terminate TLS at a reverse proxy and set `SECURE_COOKIES=true`.
 
 ## Automation
 
-GitHub Actions runs module consistency checks, `go vet`, race-enabled tests,
-a static build, and a complete container build on pull requests and pushes to
-`main`.
+GitHub Actions runs golangci-lint, module consistency checks, `go vet`,
+race-enabled tests, a static build, and a complete container build on pull
+requests and pushes to `main`.
 
 Pushes to `main` also publish a multi-platform image for AMD64 and ARM64 as
 `ghcr.io/itsbth/pal-pal:latest`. Version tags matching `v*` publish semantic

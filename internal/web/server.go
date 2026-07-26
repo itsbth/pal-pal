@@ -145,19 +145,19 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) dashboardPage(w http.ResponseWriter, _ *http.Request, current session) {
 	s.renderPage(w, "dashboard", s.baseData("Overview", "overview", current))
 }
 
-func (s *Server) playersPage(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) playersPage(w http.ResponseWriter, _ *http.Request, current session) {
 	s.renderPage(w, "players", s.baseData("Players", "players", current))
 }
 
-func (s *Server) mapPage(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) mapPage(w http.ResponseWriter, _ *http.Request, current session) {
 	s.renderPage(w, "map", s.baseData("Map", "map", current))
 }
 
-func (s *Server) metricsPage(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) metricsPage(w http.ResponseWriter, _ *http.Request, current session) {
 	s.renderPage(w, "metrics", s.baseData("Metrics", "metrics", current))
 }
 
@@ -172,7 +172,7 @@ func (s *Server) settingsPage(w http.ResponseWriter, r *http.Request, current se
 	s.renderPage(w, "settings", data)
 }
 
-func (s *Server) overviewComponent(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) overviewComponent(w http.ResponseWriter, _ *http.Request, current session) {
 	data := s.baseData("", "", current)
 	data.Snapshot = s.monitor.Snapshot()
 	data.WorldSummary = summarizeWorld(data.Snapshot.GameData.Actors)
@@ -187,7 +187,7 @@ func (s *Server) playersComponent(w http.ResponseWriter, r *http.Request, curren
 	s.renderComponent(w, "players", data)
 }
 
-func (s *Server) mapComponent(w http.ResponseWriter, r *http.Request, current session) {
+func (s *Server) mapComponent(w http.ResponseWriter, _ *http.Request, current session) {
 	data := s.baseData("", "", current)
 	data.Snapshot = s.monitor.Snapshot()
 	data.Markers = markersForView(data.Snapshot.Players)
@@ -203,7 +203,9 @@ func (s *Server) mapImage(w http.ResponseWriter, r *http.Request, _ session) {
 		http.NotFound(w, r)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	info, err := file.Stat()
 	if err != nil || !info.Mode().IsRegular() {
@@ -299,7 +301,7 @@ func (s *Server) renderPlayersAfterAction(w http.ResponseWriter, r *http.Request
 	s.renderComponent(w, "players", data)
 }
 
-func (s *Server) renderActionError(w http.ResponseWriter, r *http.Request, current session, message string) {
+func (s *Server) renderActionError(w http.ResponseWriter, _ *http.Request, current session, message string) {
 	data := s.baseData("", "", current)
 	data.Snapshot = s.monitor.Snapshot()
 	data.Players = playersForView(data.Snapshot.Players, true)
