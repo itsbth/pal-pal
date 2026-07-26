@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -33,17 +34,19 @@ type Config struct {
 	PublicPassword string
 	AdminPassword  string
 	SecureCookies  bool
+	MapImagePath   string
 }
 
 type Server struct {
-	api        API
-	monitor    SnapshotSource
-	store      MetricHistory
-	log        *slog.Logger
-	render     *renderer
-	sessions   *sessions
-	publicRead bool
-	handler    http.Handler
+	api          API
+	monitor      SnapshotSource
+	store        MetricHistory
+	log          *slog.Logger
+	render       *renderer
+	sessions     *sessions
+	publicRead   bool
+	mapImagePath string
+	handler      http.Handler
 }
 
 func New(
@@ -59,13 +62,14 @@ func New(
 	}
 
 	server := &Server{
-		api:        api,
-		monitor:    monitor,
-		store:      store,
-		log:        log,
-		render:     render,
-		sessions:   newSessions(cfg.PublicRead, cfg.PublicPassword, cfg.AdminPassword, cfg.SecureCookies),
-		publicRead: cfg.PublicRead,
+		api:          api,
+		monitor:      monitor,
+		store:        store,
+		log:          log,
+		render:       render,
+		sessions:     newSessions(cfg.PublicRead, cfg.PublicPassword, cfg.AdminPassword, cfg.SecureCookies),
+		publicRead:   cfg.PublicRead,
+		mapImagePath: cfg.MapImagePath,
 	}
 
 	mux := http.NewServeMux()
@@ -77,6 +81,7 @@ func New(
 	mux.HandleFunc("GET /", server.withViewer(server.dashboardPage))
 	mux.HandleFunc("GET /players", server.withViewer(server.playersPage))
 	mux.HandleFunc("GET /map", server.withViewer(server.mapPage))
+	mux.HandleFunc("GET /map-image", server.withViewer(server.mapImage))
 	mux.HandleFunc("GET /metrics", server.withViewer(server.metricsPage))
 	mux.HandleFunc("GET /settings", server.withAdmin(server.settingsPage))
 
@@ -186,7 +191,32 @@ func (s *Server) mapComponent(w http.ResponseWriter, r *http.Request, current se
 	data := s.baseData("", "", current)
 	data.Snapshot = s.monitor.Snapshot()
 	data.Markers = markersForView(data.Snapshot.Players)
+	if s.hasMapImage() {
+		data.MapImageURL = "/map-image"
+	}
 	s.renderComponent(w, "map", data)
+}
+
+func (s *Server) mapImage(w http.ResponseWriter, r *http.Request, _ session) {
+	file, err := os.Open(s.mapImagePath)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil || !info.Mode().IsRegular() {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Cache-Control", "private, no-cache")
+	http.ServeContent(w, r, info.Name(), info.ModTime(), file)
+}
+
+func (s *Server) hasMapImage() bool {
+	info, err := os.Stat(s.mapImagePath)
+	return err == nil && info.Mode().IsRegular()
 }
 
 func (s *Server) metricsComponent(w http.ResponseWriter, r *http.Request, current session) {

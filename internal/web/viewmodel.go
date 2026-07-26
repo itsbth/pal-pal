@@ -30,6 +30,7 @@ type pageData struct {
 	PlayerPoints string
 	ChartStart   string
 	ChartEnd     string
+	MapImageURL  string
 }
 
 type playerView struct {

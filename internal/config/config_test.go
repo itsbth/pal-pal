@@ -32,6 +32,9 @@ func TestLoad(t *testing.T) {
 	if !cfg.GameDataEnabled || cfg.GameDataInterval != 2*time.Minute {
 		t.Fatalf("game data config = %v, %v", cfg.GameDataEnabled, cfg.GameDataInterval)
 	}
+	if cfg.MapImagePath != filepath.Join(filepath.Dir(cfg.DataPath), "main.webp") {
+		t.Fatalf("MapImagePath = %q", cfg.MapImagePath)
+	}
 }
 
 func TestLoadRejectsFastGameDataPolling(t *testing.T) {
@@ -69,5 +72,22 @@ func TestLoadAcceptsDataDirectory(t *testing.T) {
 	}
 	if filepath.Base(cfg.DataPath) != "pal-pal.db" {
 		t.Fatalf("DataPath = %q", cfg.DataPath)
+	}
+}
+
+func TestLoadAcceptsCustomMapImagePath(t *testing.T) {
+	t.Setenv("API_ROOT", "http://127.0.0.1:8212")
+	t.Setenv("API_PASSWORD", "api-secret")
+	t.Setenv("ADMIN_PASSWORD", "admin-secret")
+	t.Setenv("DATA_PATH", filepath.Join(t.TempDir(), "test.db"))
+	mapImagePath := filepath.Join(t.TempDir(), "world map.webp")
+	t.Setenv("MAP_IMAGE_PATH", mapImagePath)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if cfg.MapImagePath != mapImagePath {
+		t.Fatalf("MapImagePath = %q, want %q", cfg.MapImagePath, mapImagePath)
 	}
 }

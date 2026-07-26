@@ -17,6 +17,7 @@ type Config struct {
 	PublicPassword   string
 	AdminPassword    string
 	DataPath         string
+	MapImagePath     string
 	ListenAddress    string
 	SecureCookies    bool
 	PollInterval     time.Duration
@@ -63,6 +64,7 @@ func Load() (Config, error) {
 		PublicPassword:   os.Getenv("PUBLIC_PASSWORD"),
 		AdminPassword:    os.Getenv("ADMIN_PASSWORD"),
 		DataPath:         envOr("DATA_PATH", "data"),
+		MapImagePath:     strings.TrimSpace(os.Getenv("MAP_IMAGE_PATH")),
 		ListenAddress:    envOr("LISTEN_ADDRESS", ":8080"),
 		SecureCookies:    secureCookies,
 		PollInterval:     pollInterval,
@@ -100,6 +102,14 @@ func Load() (Config, error) {
 	}
 	if filepath.Ext(cfg.DataPath) == "" {
 		cfg.DataPath = filepath.Join(cfg.DataPath, "pal-pal.db")
+	}
+	if cfg.MapImagePath == "" {
+		cfg.MapImagePath = filepath.Join(filepath.Dir(cfg.DataPath), "main.webp")
+	} else {
+		cfg.MapImagePath, err = filepath.Abs(cfg.MapImagePath)
+		if err != nil {
+			return Config{}, fmt.Errorf("resolve MAP_IMAGE_PATH: %w", err)
+		}
 	}
 	return cfg, nil
 }

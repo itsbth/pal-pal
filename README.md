@@ -8,7 +8,7 @@ It keeps the upstream API credentials on the server, exposes a read-only view wh
 
 - Live server status and activity
 - Player list with admin-only IP addresses, kick, ban, and unban controls
-- Relative coordinate plot for online player locations
+- Relative coordinate plot for online player locations, with an optional local map image
 - SQLite-backed metrics history with Go-emitted SVG graphs
 - Optional world snapshots with in-game time and aggregate actor counts
 - Admin-only full server settings
@@ -64,6 +64,7 @@ Copy `.env.example` to `.env` and set:
 | `PUBLIC_PASSWORD` | no | empty | Optional shared viewer login |
 | `ADMIN_PASSWORD` | yes | | Pal-pal administrator login |
 | `DATA_PATH` | no | `data` | Data directory or explicit SQLite `.db` path |
+| `MAP_IMAGE_PATH` | no | `main.webp` beside the database | Optional map image shown behind player markers |
 | `LISTEN_ADDRESS` | no | `:8080` | HTTP listen address |
 | `POLL_INTERVAL` | no | `15s` | Live polling and metric sample interval |
 | `HISTORY_RETENTION` | no | `720h` | Metric retention duration |
@@ -73,6 +74,11 @@ Copy `.env.example` to `.env` and set:
 
 Pal-pal automatically loads `.env` if present. Existing process environment variables take precedence.
 When `API_ROOT` contains no path, Pal-pal automatically appends the documented `/v1/api` prefix.
+
+To enable the map preview, place a browser-compatible image at `data/main.webp`
+when using the default data path, or point `MAP_IMAGE_PATH` at another local
+image. The image is served only to users who can access the map. Marker
+coordinates remain relative until the map bounds are calibrated.
 
 World snapshots are disabled by default because `/game-data` must be enabled on
 the Palworld server and may return a much larger response than the core
@@ -129,8 +135,11 @@ The original brief did not specify several implementation details. This scaffold
 - A 15-second poll interval and 30-day metric retention
 - Go-emitted SVG graphs rather than a browser charting dependency
 - Field-level read restrictions in addition to admin-only routes
-- A relative player coordinate plot with no external map asset
+- A relative player coordinate plot with optional local map imagery
 - One shared viewer password and one shared admin password
 - In-memory 12-hour sessions
 
-Before treating the map as geographical, select a Palworld map asset, confirm its license, and calibrate the world-coordinate bounds. Production deployments should also decide whether sessions need persistent multi-user identities, audit logging, and rate limiting at the reverse proxy.
+Before treating the map as geographical, confirm the selected asset's license
+and calibrate the world-coordinate bounds. Production deployments should also
+decide whether sessions need persistent multi-user identities, audit logging,
+and rate limiting at the reverse proxy.

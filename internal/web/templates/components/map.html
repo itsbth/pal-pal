@@ -1,19 +1,23 @@
 {{if .Snapshot.LastError}}
 <div class="notice notice-warning" role="status">Locations may be stale. {{.Snapshot.LastError}}</div>
 {{end}}
-{{if .Markers}}
-<div class="map-layout">
+{{if or .Markers .MapImageURL}}
+<div class="map-layout{{if not .Markers}} map-layout-solo{{end}}">
   <div class="coordinate-map">
     <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title map-desc">
-      <title id="map-title">Relative player locations</title>
-      <desc id="map-desc">A coordinate plot of the players currently online.</desc>
+      <title id="map-title">{{if .MapImageURL}}Player locations on the configured map{{else}}Relative player locations{{end}}</title>
+      <desc id="map-desc">{{if .MapImageURL}}An uncalibrated map preview with markers for the players currently online.{{else}}A coordinate plot of the players currently online.{{end}}</desc>
+      <rect width="100" height="100" rx="2" class="map-surface"/>
+      {{if .MapImageURL}}
+      <image href="{{.MapImageURL}}" width="100" height="100" preserveAspectRatio="xMidYMid meet" class="map-image"/>
+      {{else}}
       <defs>
         <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
           <path d="M 10 0 L 0 0 0 10" fill="none" class="map-grid"/>
         </pattern>
       </defs>
-      <rect width="100" height="100" rx="2" class="map-surface"/>
       <rect width="100" height="100" rx="2" fill="url(#grid)"/>
+      {{end}}
       {{range .Markers}}
       <g transform="translate({{printf "%.2f" .X}} {{printf "%.2f" .Y}})">
         <circle r="2.1" class="map-marker-ring"/>
@@ -22,6 +26,7 @@
       {{end}}
     </svg>
   </div>
+  {{if .Markers}}
   <ol class="map-legend">
     {{range .Markers}}
     <li>
@@ -30,8 +35,18 @@
     </li>
     {{end}}
   </ol>
+  {{else}}
+  <div class="map-presence-note">
+    <strong>No player locations to plot</strong>
+    <span>Markers will appear when someone joins the server.</span>
+  </div>
+  {{end}}
 </div>
-<p class="helper-text">This scaffold plots current players relative to one another. Add a calibrated map image and world bounds when those assets are selected.</p>
+{{if .MapImageURL}}
+<p class="helper-text">Map preview enabled. Player markers are still positioned relative to one another and are not calibrated to landmarks yet.</p>
+{{else}}
+<p class="helper-text">This scaffold plots current players relative to one another. Add <code>main.webp</code> beside the database, or set <code>MAP_IMAGE_PATH</code>, to show a map preview.</p>
+{{end}}
 {{else}}
 <div class="empty-state map-empty">
   <strong>No player locations to plot</strong>

@@ -78,6 +78,7 @@ func run(parent context.Context) error {
 		PublicPassword: cfg.PublicPassword,
 		AdminPassword:  cfg.AdminPassword,
 		SecureCookies:  cfg.SecureCookies,
+		MapImagePath:   cfg.MapImagePath,
 	}, log)
 	if err != nil {
 		return err

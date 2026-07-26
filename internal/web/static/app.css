@@ -648,11 +648,15 @@ code {
 .coordinate-map svg {
   display: block;
   width: 100%;
-  min-height: 30rem;
+  aspect-ratio: 1;
 }
 
 .map-surface {
   fill: oklch(94% 0.035 151);
+}
+
+.map-image {
+  pointer-events: none;
 }
 
 .map-grid {
@@ -664,10 +668,28 @@ code {
   fill: var(--surface);
   stroke: var(--accent);
   stroke-width: 0.45;
+  vector-effect: non-scaling-stroke;
 }
 
 .map-marker {
   fill: var(--accent-dark);
+}
+
+.map-layout-solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.map-presence-note {
+  display: grid;
+  place-content: center;
+  gap: 0.25rem;
+  padding: 1rem 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.map-presence-note strong {
+  color: var(--ink);
 }
 
 .map-legend {
