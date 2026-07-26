@@ -126,8 +126,15 @@ terminate TLS at a reverse proxy and set `SECURE_COOKIES=true`.
 
 GitHub Actions runs module consistency checks, `go vet`, race-enabled tests,
 a static build, and a complete container build on pull requests and pushes to
-`main`. Renovate tracks Go modules, GitHub Actions, and container base images;
-its best-practices preset pins Actions and Docker images to immutable digests.
+`main`.
+
+Pushes to `main` also publish a multi-platform image for AMD64 and ARM64 as
+`ghcr.io/itsbth/pal-pal:latest`. Version tags matching `v*` publish semantic
+version tags, and every published image also receives a `sha-<commit>` tag. The
+publish workflow can also be started manually.
+
+Renovate tracks Go modules, GitHub Actions, and container base images; its
+best-practices preset pins Actions and Docker images to immutable digests.
 
 ## Scaffold decisions and open work
 
