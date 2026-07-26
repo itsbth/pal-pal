@@ -39,7 +39,7 @@ func TestOverviewRendersOptionalWorldSnapshot(t *testing.T) {
 	}
 
 	body := output.String()
-	for _, expected := range []string{"World snapshot", "14:30", "day 5", "Base Pals", ">4<"} {
+	for _, expected := range []string{">World<", "14:30", "Base Pals", ">4<"} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("overview does not contain %q", expected)
 		}
@@ -56,7 +56,7 @@ func TestOverviewOmitsWorldSnapshotWhenDisabled(t *testing.T) {
 	if err := renderer.component(&output, "overview", pageData{}); err != nil {
 		t.Fatalf("component() error = %v", err)
 	}
-	if strings.Contains(output.String(), "World snapshot") {
+	if strings.Contains(output.String(), ">World<") {
 		t.Fatal("disabled overview contains world snapshot")
 	}
 }
@@ -84,7 +84,7 @@ func TestMapRendersOptionalImageBehindMarkers(t *testing.T) {
 	for _, expected := range []string{
 		`<image href="/map-image"`,
 		`translate(42.00 58.00)`,
-		"provisional fixed calibration",
+		"Positions are approximate.",
 	} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("map does not contain %q", expected)

@@ -20,9 +20,10 @@ type renderer struct {
 
 func newRenderer() (*renderer, error) {
 	funcs := template.FuncMap{
+		"add": func(a, b int) int { return a + b },
 		"formatTime": func(value time.Time) string {
 			if value.IsZero() {
-				return "Waiting for first poll"
+				return "never"
 			}
 			return value.Format("15:04:05")
 		},

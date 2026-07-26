@@ -330,7 +330,6 @@ func (s *Server) baseData(title, active string, current session) pageData {
 	return pageData{
 		Title:      title,
 		Active:     active,
-		Role:       current.Role.String(),
 		IsAdmin:    current.Role == roleAdmin,
 		CanSignOut: current.CSRFToken != "",
 		PublicRead: s.publicRead,

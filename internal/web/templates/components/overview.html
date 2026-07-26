@@ -1,7 +1,7 @@
 {{if .Snapshot.LastError}}
 <div class="notice notice-warning" role="status">
-  <strong>Live data is incomplete.</strong>
-  <span>{{.Snapshot.LastError}}</span>
+  <strong>Some live data is missing.</strong>
+  {{if .IsAdmin}}<span>{{.Snapshot.LastError}}</span>{{else}}<span>The server did not answer the last request.</span>{{end}}
 </div>
 {{end}}
 <div class="server-intro">
@@ -10,11 +10,11 @@
       <span class="status-dot {{if .Snapshot.UpdatedAt.IsZero}}status-offline{{end}}" aria-hidden="true"></span>
       <span>{{if .Snapshot.UpdatedAt.IsZero}}Connecting{{else}}Online{{end}}</span>
     </div>
-    <h2>{{if .Snapshot.Info.ServerName}}{{.Snapshot.Info.ServerName}}{{else}}Palworld server{{end}}</h2>
+    <h1>{{if .Snapshot.Info.ServerName}}{{.Snapshot.Info.ServerName}}{{else}}Palworld server{{end}}</h1>
     {{if .Snapshot.Info.Description}}<p>{{.Snapshot.Info.Description}}</p>{{end}}
   </div>
   <div class="server-meta">
-    <span>Version {{if .Snapshot.Info.Version}}{{.Snapshot.Info.Version}}{{else}}unknown{{end}}</span>
+    {{if .Snapshot.Info.Version}}<span>Version {{.Snapshot.Info.Version}}</span>{{end}}
     <span>Updated {{formatTime .Snapshot.UpdatedAt}}</span>
   </div>
 </div>
@@ -24,7 +24,7 @@
     <dd>{{.Snapshot.Metrics.CurrentPlayerNum}} <span>/ {{.Snapshot.Metrics.MaxPlayerNum}}</span></dd>
   </div>
   <div>
-    <dt>Server FPS</dt>
+    <dt>FPS</dt>
     <dd>{{.Snapshot.Metrics.ServerFPS}}</dd>
   </div>
   <div>
@@ -36,39 +36,29 @@
     <dd>{{formatDuration .Snapshot.Metrics.Uptime}}</dd>
   </div>
   <div>
-    <dt>World day</dt>
+    <dt>In-game day</dt>
     <dd>{{.Snapshot.Metrics.Days}}</dd>
   </div>
 </dl>
 {{if .Snapshot.GameDataEnabled}}
-<section class="world-snapshot" aria-labelledby="world-snapshot-title">
-  <div class="world-snapshot-heading">
-    <div>
-      <p class="eyebrow">Optional world data</p>
-      <h3 id="world-snapshot-title">World snapshot</h3>
-    </div>
+<section class="world-section" aria-labelledby="world-title">
+  <div class="world-heading">
+    <h2 id="world-title">World</h2>
     <span class="refresh-note">
-      {{if .Snapshot.GameData.RecordedAt.IsZero}}Waiting for first snapshot{{else}}Updated {{formatTime .Snapshot.GameData.RecordedAt}}{{end}}
+      {{if .Snapshot.GameData.RecordedAt.IsZero}}Not collected yet{{else}}Updated {{formatTime .Snapshot.GameData.RecordedAt}}{{end}}
     </span>
   </div>
   {{if .Snapshot.GameDataError}}
   <div class="notice notice-warning" role="status">
     <strong>World data is unavailable.</strong>
-    <span>{{.Snapshot.GameDataError}}</span>
+    {{if .IsAdmin}}<span>{{.Snapshot.GameDataError}}</span>{{end}}
   </div>
   {{end}}
   {{if not .Snapshot.GameData.RecordedAt.IsZero}}
   <dl class="metric-strip world-metric-strip">
     <div>
-      <dt>World clock</dt>
-      <dd>
-        {{if .Snapshot.GameData.InGameTime}}{{.Snapshot.GameData.InGameTime}}{{else}}—{{end}}
-        <span>day {{.Snapshot.GameData.InGameDays}}</span>
-      </dd>
-    </div>
-    <div>
-      <dt>World actors</dt>
-      <dd>{{.WorldSummary.Actors}}</dd>
+      <dt>Time</dt>
+      <dd>{{if .Snapshot.GameData.InGameTime}}{{.Snapshot.GameData.InGameTime}}{{else}}—{{end}}</dd>
     </div>
     <div>
       <dt>Base Pals</dt>
@@ -82,24 +72,11 @@
       <dt>Palboxes</dt>
       <dd>{{.WorldSummary.PalBoxes}}</dd>
     </div>
+    <div>
+      <dt>Objects</dt>
+      <dd>{{.WorldSummary.Actors}}</dd>
+    </div>
   </dl>
-  <p class="helper-text world-snapshot-note">
-    Snapshot FPS {{printf "%.1f" .Snapshot.GameData.FPS}} · average {{printf "%.1f" .Snapshot.GameData.AverageFPS}}
-  </p>
   {{end}}
 </section>
 {{end}}
-<div class="overview-links">
-  <a class="feature-link" href="/players">
-    <span><strong>Players</strong><small>See who is online</small></span>
-    <span aria-hidden="true">→</span>
-  </a>
-  <a class="feature-link" href="/map">
-    <span><strong>Map</strong><small>Check current locations</small></span>
-    <span aria-hidden="true">→</span>
-  </a>
-  <a class="feature-link" href="/metrics">
-    <span><strong>Metrics</strong><small>Review the last 24 hours</small></span>
-    <span aria-hidden="true">→</span>
-  </a>
-</div>

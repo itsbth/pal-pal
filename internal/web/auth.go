@@ -19,17 +19,6 @@ const (
 	roleAdmin
 )
 
-func (r role) String() string {
-	switch r {
-	case roleAdmin:
-		return "Admin"
-	case roleViewer:
-		return "Viewer"
-	default:
-		return "Signed out"
-	}
-}
-
 type session struct {
 	Role      role
 	CSRFToken string

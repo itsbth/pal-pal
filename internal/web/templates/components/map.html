@@ -1,12 +1,14 @@
 {{if .Snapshot.LastError}}
-<div class="notice notice-warning" role="status">Locations may be stale. {{.Snapshot.LastError}}</div>
+<div class="notice notice-warning" role="status">
+  <strong>Positions may be out of date.</strong>
+  {{if .IsAdmin}}<span>{{.Snapshot.LastError}}</span>{{end}}
+</div>
 {{end}}
 {{if or .Markers .MapImageURL}}
 <div class="map-layout{{if not .Markers}} map-layout-solo{{end}}">
   <div class="coordinate-map">
-    <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title map-desc">
-      <title id="map-title">{{if .MapImageURL}}Player locations on the configured map{{else}}Player world locations{{end}}</title>
-      <desc id="map-desc">An approximate world-coordinate plot of the players currently online.</desc>
+    <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title">
+      <title id="map-title">{{if .Markers}}Where everyone is right now{{else}}The world map, with nobody online{{end}}</title>
       <rect width="100" height="100" rx="2" class="map-surface"/>
       {{if .MapImageURL}}
       <image href="{{.MapImageURL}}" width="100" height="100" preserveAspectRatio="xMidYMid meet" class="map-image"/>
@@ -18,38 +20,38 @@
       </defs>
       <rect width="100" height="100" rx="2" fill="url(#grid)"/>
       {{end}}
-      {{range .Markers}}
-      <g transform="translate({{printf "%.2f" .X}} {{printf "%.2f" .Y}})">
+      {{range $index, $marker := .Markers}}
+      <g transform="translate({{printf "%.2f" $marker.X}} {{printf "%.2f" $marker.Y}})">
         <circle r="2.1" class="map-marker-ring"/>
         <circle r="1.1" class="map-marker"/>
+        <text class="map-marker-label" y="-3.1" text-anchor="middle">{{add $index 1}}</text>
       </g>
       {{end}}
     </svg>
   </div>
   {{if .Markers}}
   <ol class="map-legend">
-    {{range .Markers}}
+    {{range $index, $marker := .Markers}}
     <li>
-      <span class="legend-dot" aria-hidden="true"></span>
-      <span><strong>{{.Name}}</strong><small>{{printf "%.0f" .RawX}}, {{printf "%.0f" .RawY}}</small></span>
+      <span class="legend-index" aria-hidden="true">{{add $index 1}}</span>
+      <span>{{$marker.Name}}</span>
     </li>
     {{end}}
   </ol>
   {{else}}
   <div class="map-presence-note">
-    <strong>No player locations to plot</strong>
+    <strong>Nobody is online</strong>
     <span>Markers will appear when someone joins the server.</span>
   </div>
   {{end}}
 </div>
-{{if .MapImageURL}}
-<p class="helper-text">Marker placement uses a provisional fixed calibration for this map image.</p>
-{{else}}
-<p class="helper-text">Locations use provisional fixed world coordinates. Add <code>main.webp</code> beside the database, or set <code>MAP_IMAGE_PATH</code>, to show a map preview.</p>
-{{end}}
+<p class="helper-text">
+  Positions are approximate.
+  {{if and .IsAdmin (not .MapImageURL)}}Drop a <code>main.webp</code> beside the database, or set <code>MAP_IMAGE_PATH</code>, to show the map behind the markers.{{end}}
+</p>
 {{else}}
 <div class="empty-state map-empty">
-  <strong>No player locations to plot</strong>
-  <span>The map will populate when someone joins the server.</span>
+  <strong>Nobody is online</strong>
+  <span>Markers will appear when someone joins the server.</span>
 </div>
 {{end}}

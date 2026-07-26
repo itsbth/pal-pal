@@ -1,23 +1,23 @@
 {{define "content"}}
 <header class="page-heading">
-  <div>
-    <p class="eyebrow">Admin only</p>
-    <h1>Server settings</h1>
-  </div>
-  <span class="role-badge role-admin">Sensitive</span>
+  <h1>Settings</h1>
+  <span class="refresh-note">Read-only, as reported by the server</span>
 </header>
 {{if .Error}}
 <div class="notice notice-error" role="alert">{{.Error}}</div>
-{{else}}
-<div class="settings-list" aria-label="Palworld server settings">
+{{else if .Settings}}
+<dl class="settings-list">
   {{range .Settings}}
   <div class="setting-row">
     <dt>{{.Name}}</dt>
     <dd>{{.Value}}</dd>
   </div>
-  {{else}}
-  <p class="empty-state">No settings were returned by the server.</p>
   {{end}}
+</dl>
+{{else}}
+<div class="empty-state">
+  <strong>Nothing to show</strong>
+  <span>The server did not report any settings.</span>
 </div>
 {{end}}
 {{end}}

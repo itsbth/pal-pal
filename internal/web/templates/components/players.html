@@ -1,7 +1,10 @@
 {{if .Flash}}<div class="notice notice-success" role="status">{{.Flash}}</div>{{end}}
 {{if .Error}}<div class="notice notice-error" role="alert">{{.Error}}</div>{{end}}
 {{if .Snapshot.LastError}}
-<div class="notice notice-warning" role="status">Player data may be stale. {{.Snapshot.LastError}}</div>
+<div class="notice notice-warning" role="status">
+  <strong>This list may be out of date.</strong>
+  {{if .IsAdmin}}<span>{{.Snapshot.LastError}}</span>{{end}}
+</div>
 {{end}}
 {{if .IsAdmin}}
 <details class="admin-tool">
@@ -50,14 +53,14 @@
               <form method="post" action="/admin/players/kick" hx-post="/admin/players/kick" hx-target="#players-component">
                 <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
                 <input type="hidden" name="user_id" value="{{.UserID}}">
-                <label>Message <input name="message" maxlength="500" placeholder="Optional"></label>
+                <label>Message shown to {{.Name}} <input name="message" maxlength="500" placeholder="Optional"></label>
                 <button class="button button-quiet" type="submit">Kick</button>
               </form>
               <form method="post" action="/admin/players/ban" hx-post="/admin/players/ban" hx-target="#players-component">
                 <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
                 <input type="hidden" name="user_id" value="{{.UserID}}">
                 <input type="hidden" name="message" value="">
-                <button class="button button-danger" type="submit">Ban player</button>
+                <button class="button button-danger" type="submit">Ban</button>
               </form>
             </div>
           </details>
@@ -68,8 +71,8 @@
       <tr>
         <td colspan="{{if .IsAdmin}}6{{else}}4{{end}}">
           <div class="empty-state">
-            <strong>No players online</strong>
-            <span>Connected players will appear here after the next poll.</span>
+            <strong>Nobody is online</strong>
+            <span>Players show up here as they join.</span>
           </div>
         </td>
       </tr>

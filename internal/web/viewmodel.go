@@ -13,7 +13,6 @@ import (
 type pageData struct {
 	Title        string
 	Active       string
-	Role         string
 	IsAdmin      bool
 	CanSignOut   bool
 	PublicRead   bool
@@ -49,8 +48,6 @@ type mapMarker struct {
 	Name string
 	X    float64
 	Y    float64
-	RawX float64
-	RawY float64
 }
 
 type settingView struct {
@@ -123,8 +120,6 @@ func markersForView(players []domain.Player) []mapMarker {
 			Name: player.Name,
 			X:    x,
 			Y:    y,
-			RawX: player.LocationX,
-			RawY: player.LocationY,
 		})
 	}
 	return result
